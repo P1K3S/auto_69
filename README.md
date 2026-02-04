@@ -56,6 +56,8 @@ on:
 | `TOKEN` | `auto` |❌|自动签到变量(Cloudflare方式才使用) |
 | `TG_TOKEN` | `6901234567:XXXXXXXXXX0qExxxhHxxbXXX` |❌| 发送TG通知机器人的token | 
 | `TG_ID` | `6901234567` |❌| 接收TG通知的账户ID | 
+| `GOTIFY_URL` | `https://gotify.yourdomain.com` |❌| Gotify 服务根地址（无末尾 /） | 
+| `GOTIFY_TOKEN` | `A1b2C3d4E5f6G7h8I9j0K` |❌| 从 Gotify 后台获取的应用令牌 | 
 
 ## 四、Telegram获取token 和chat_id 的方式
 ### 1、加入 BotFather 机器人
