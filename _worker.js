@@ -3,10 +3,13 @@ let username = "Enter your email here";
 let password = "Enter your password here"; 
 let token; 
 let botToken = '';  
-let chatId = '';  
+let chatId = '';
+// 新增 Gotify 配置项
+let gotifyUrl = '';  // Gotify 服务地址（如：https://gotify.example.com）
+let gotifyToken = '';// Gotify 应用令牌
 let checkInResult;
 let jcType = '69yun69';  
- // 初始化变量
+// 初始化变量
 let fetch, Response; 
 
 // 判断当前环境是否是 Node.js 环境
@@ -22,9 +25,10 @@ if (typeof globalThis.fetch === "undefined") {
         PASSWORD: process.env.PASSWORD,
         TOKEN: process.env.TOKEN,
         TG_TOKEN: process.env.TG_TOKEN,
-        TG_ID: process.env.TG_ID
+        TG_ID: process.env.TG_ID,
+        GOTIFY_URL: process.env.GOTIFY_URL, // 新增 Node.js 环境变量
+        GOTIFY_TOKEN: process.env.GOTIFY_TOKEN // 新增 Node.js 环境变量
     };
-   //console.log("在 Node.js 环境中env",env);
 
     const handler = {
         async scheduled(controller, env) {
@@ -35,7 +39,7 @@ if (typeof globalThis.fetch === "undefined") {
                 console.log("定时任务成功完成");
             } catch (error) {
                 console.error("定时任务失败:", error);
-                await sendMessage(`${jcType}定时任务失败: ${error.message}`);
+                await sendAllMessages(`${jcType}定时任务失败: ${error.message}`); // 替换为统一推送函数
             }
         }
     };
@@ -51,6 +55,20 @@ if (typeof globalThis.fetch === "undefined") {
   console.log("在 Cloudflare Worker 环境中，已使用内置 fetch");
 }
 
+// 处理 Node.js 环境的 module 导出（避免 Cloudflare 报错）
+if (typeof module !== 'undefined') {
+  module.exports = { scheduled: async (controller, env) => {
+    console.log("Node.js 定时任务开始");
+    try {
+      await initConfig(env);
+      await handleCheckIn();
+      console.log("Node.js 定时任务成功完成");
+    } catch (error) {
+      console.error("Node.js 定时任务失败:", error);
+      await sendAllMessages(`${jcType}定时任务失败: ${error.message}`);
+    }
+  }};
+}
 
 export default {
     async fetch(request, env) {
@@ -77,7 +95,7 @@ export default {
             console.log("定时任务成功完成");
         } catch (error) {
             console.error("定时任务失败:", error);
-            await sendMessage(`${jcType}定时任务失败: ${error.message}`);
+            await sendAllMessages(`${jcType}定时任务失败: ${error.message}`); // 替换为统一推送函数
         }
     },
 };
@@ -98,12 +116,12 @@ async function handleCheckIn() {
           checkInResult = await performCheckIn(cookies);
         }
  
-        await sendMessage(checkInResult);
+        await sendAllMessages(checkInResult); // 替换为统一推送函数
         return new Response(checkInResult, { status: 200 });
     } catch (error) {
         console.error("签到失败:", error);
         const errorMsg = `${checkInResult}\n🎁${error.message}`;
-        await sendMessage(errorMsg);
+        await sendAllMessages(errorMsg); // 替换为统一推送函数
         return new Response(errorMsg, { status: 500 });
     }
 }
@@ -139,7 +157,7 @@ async function loginAndGetCookies() {
 
     const cookieHeader = response.headers.get("set-cookie");
     if (!cookieHeader) {
-        throw new Error("${jcType}登录成功但未收到 Cookies");
+        throw new Error(`${jcType}登录成功但未收到 Cookies`);
     }
 
     return cookieHeader.split(',').map(cookie => cookie.split(';')[0]).join("; ");
@@ -205,7 +223,6 @@ async function hongxingdlCheckIn() {
     return `🎉 ${jcType}签到结果 🎉\n${jsonResponse.data?.mag ?? "签到完成"}${str}`;
 }
 
-
 const jcButtons = {
     "69yun69": [
         [
@@ -225,7 +242,7 @@ const jcButtons = {
     ]
 };
 
-
+// 原有 Telegram 推送函数（保留不变）
 async function sendMessage(msg) {
     if (!botToken || !chatId) {
         console.log("Telegram 推送未启用. 消息内容:", msg);
@@ -274,6 +291,60 @@ async function sendMessage(msg) {
     }
 }
 
+// 新增：Gotify 推送函数
+async function sendGotifyMessage(msg) {
+    // 未配置 Gotify 则跳过推送
+    if (!gotifyUrl || !gotifyToken) {
+        console.log("Gotify 推送未启用. 消息内容:", msg);
+        return;
+    }
+
+    const now = new Date();
+    // 统一使用东八区时间，与 Telegram 推送格式保持一致
+    const formattedTime = new Date(now.getTime() + 8 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 19)
+        .replace("T", " ");
+    // 消息标题（标识机场类型）+ 内容（含执行时间）
+    const title = `${jcType} 签到通知`;
+    const messageText = `执行时间: ${formattedTime}\n${msg}`;
+
+    try {
+        // Gotify Webhook 标准请求：POST + JSON 体 + token 认证
+        const response = await fetch(`${gotifyUrl}/message?token=${gotifyToken}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json; charset=utf-8"
+            },
+            body: JSON.stringify({
+                title: title,    // 消息标题（必填）
+                message: messageText, // 消息内容（必填）
+                priority: 5      // 优先级（1-10，5为中等，可根据需要调整）
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Gotify 消息发送失败:", errorText);
+            return `Gotify 消息发送失败: ${errorText}`;
+        }
+
+        console.log("Gotify 消息发送成功");
+        return `Gotify 消息发送成功: ${title}`;
+    } catch (error) {
+        console.error("发送 Gotify 消息异常:", error);
+        return `发送 Gotify 消息异常: ${error.message}`;
+    }
+}
+
+// 新增：统一推送函数（同时处理 Telegram + Gotify，互不影响）
+async function sendAllMessages(msg) {
+    // 并行执行两个推送，不阻塞彼此，捕获各自错误避免相互影响
+    await Promise.allSettled([
+        sendMessage(msg),
+        sendGotifyMessage(msg)
+    ]);
+}
 
 function formatDomain(domain) {
     return domain.includes("//") ? domain : `https://${domain}`;
@@ -281,10 +352,9 @@ function formatDomain(domain) {
 
 async function handleTgMsg() {
     const message = `${checkInResult}`;
-    const sendResult = await sendMessage(message);
-    return new Response(sendResult, { status: 200 });
+    await sendAllMessages(message); // 替换为统一推送函数
+    return new Response("消息已推送", { status: 200 });
 }
-
 
 function maskSensitiveData(str, type = 'default') {
     if (!str) return "N/A";
@@ -302,13 +372,17 @@ function maskSensitiveData(str, type = 'default') {
     return `${str[0]}****${str[str.length - 1]}`;
 }
 
+// 改造 initConfig：新增 Gotify 配置项初始化
 async function initConfig(env) {
     domain = formatDomain(env.DOMAIN || domain);
     username  = env.USERNAME || username ;
     password = env.PASSWORD || password;  
     token = env.TOKEN || token;  
     botToken = env.TG_TOKEN || botToken;  
-    chatId = env.TG_ID || chatId; 
+    chatId = env.TG_ID || chatId;
+    // 新增：初始化 Gotify 配置
+    gotifyUrl = env.GOTIFY_URL || gotifyUrl;
+    gotifyToken = env.GOTIFY_TOKEN || gotifyToken;
     jcType = env.JC_TYPE || jcType; 
     
     checkInResult = `配置信息: 
@@ -316,7 +390,6 @@ async function initConfig(env) {
     登录地址: ${maskSensitiveData(domain, 'url')} 
     登录账号: ${maskSensitiveData(username, 'email')} 
     登录密码: ${maskSensitiveData(password)} 
-    TG 推送:  ${botToken && chatId ? "已启用" : "未启用"} `;
- 
-    //console.log("initConfig-->", checkInResult);
+    TG 推送:  ${botToken && chatId ? "已启用" : "未启用"}
+    Gotify 推送:  ${gotifyUrl && gotifyToken ? "已启用" : "未启用"} `;
 }
