@@ -1,11 +1,11 @@
-# [am-check-in](https://github.com/amclubs/am-check-in)
+# Power BY [am-check-in](https://github.com/amclubs/am-check-in)
+基于am-check-in修改，新增支持gotify推送功能
 这是一个用来机场自动签到免费领取流量的自动脚本，一份代码支持多种运行环境，支持GitHub Actions、支持 Cloudflare Workers 和 Pages平台的自动签到脚本，释放你的双手出去City Walk
 - 支持 [🌐69云机场](https://69yun69.com/auth/register?code=yf8gPk)、[🌐红杏云机场 🎁5折优惠码：AM科技](https://hongxingdl.com/web/#/login?code=mn5Tuipf)、其它待验证
-
 ## 一、GitHub Actions使用方法
 - 项目地址: https://github.com/amclubs/am-check-in
 ### ① 复制仓库代码
-1. 把当前github的项目能过 use this template 复制创建到你的创建里。
+1. 把当前github的项目通过 use this template 复制创建到你的创建里。
 ### ② 设置 GitHub Actions 变量
 1. Settings -> secrets and variables -> Actions -> Secrets -> New repository secrets
 2. 设置对应的变量参数 DOMAIN、USERNAME、PASSWORD （详情参数看下面变量说明）
