@@ -223,24 +223,7 @@ async function hongxingdlCheckIn() {
     return `🎉 ${jcType}签到结果 🎉\n${jsonResponse.data?.mag ?? "签到完成"}${str}`;
 }
 
-const jcButtons = {
-    "69yun69": [
-        [
-            {
-                text: decodeBase64Utf8('44CQNjnkupHjgJHkuK3ovazpq5jpgJ/mnLrlnLos5YWo5rWB5aqS5L2T6Kej6ZSBLDEwLjg55YWDNDAwRw=='),
-                url: decodeBase64Utf8('aHR0cHM6Ly82OXl1bjY5LmNvbS9hdXRoL3JlZ2lzdGVyP2NvZGU9eWY4Z1Br')
-            }
-        ]
-    ],
-    "hongxingdl": [
-        [
-            {
-                text: decodeBase64Utf8('44CQOOaKmOegge+8mkFN56eR5oqA44CRW+e6ouadj+S6kV3kuK3ovazpq5jpgJ/mnLrlnLos6Kej6ZSB5YWo5rWB54Wk5L2T5ZKMR1BU'),
-                url: decodeBase64Utf8('aHR0cHM6Ly9ob25neGluZ3l1bjMudmlwL3dlYi8jL2xvZ2luP2NvZGU9bW41VHVpcGY=')
-            }
-        ]
-    ]
-};
+const jcButtons = {};
 
 // 原有 Telegram 推送函数（保留不变）
 async function sendMessage(msg) {
