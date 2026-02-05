@@ -277,7 +277,7 @@ async function sendMessage(msg) {
 // 新增：Gotify 推送函数
 async function sendGotifyMessage(msg) {
     // 未配置 Gotify 则跳过推送
-
+    println("GotifyUrl:", gotifyUrl, "GotifyToken:", gotifyToken);
     if (!gotifyUrl || !gotifyToken) {
         console.log("Gotify 推送未启用. 消息内容:", msg);
         return;
@@ -294,7 +294,6 @@ async function sendGotifyMessage(msg) {
     const messageText = `执行时间: ${formattedTime}\n${msg}`;
 
     try {
-        println(`${gotifyUrl}/message?token=${gotifyToken}`);
         // Gotify Webhook 标准请求：POST + JSON 体 + token 认证
         const response = await fetch(`${gotifyUrl}/message?token=${gotifyToken}`, {
             method: "POST",
