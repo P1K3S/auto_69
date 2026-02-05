@@ -277,7 +277,6 @@ async function sendMessage(msg) {
 // 新增：Gotify 推送函数
 async function sendGotifyMessage(msg) {
     // 未配置 Gotify 则跳过推送
-    println("GotifyUrl:", gotifyUrl, "GotifyToken:", gotifyToken);
     if (!gotifyUrl || !gotifyToken) {
         console.log("Gotify 推送未启用. 消息内容:", msg);
         return;
