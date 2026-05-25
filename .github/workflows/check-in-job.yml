@@ -8,15 +8,15 @@ on:
 jobs:
   checkin:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-      
+
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '16'  # 可以根据实际需要修改 Node.js 版本
+        node-version: '16'
 
     - name: Install dependencies
       run: |
@@ -25,14 +25,10 @@ jobs:
 
     - name: Run scheduled check-in
       run: |
-        node _worker.js  
+        node _worker.js
       env:
-        JC_TYPE: ${{ secrets.JC_TYPE }} 
-        DOMAIN: ${{ secrets.DOMAIN }}  
+        DOMAIN: ${{ secrets.DOMAIN }}
         USERNAME: ${{ secrets.USERNAME }}
         PASSWORD: ${{ secrets.PASSWORD }}
-        TG_TOKEN: ${{ secrets.TG_TOKEN }}
-        TG_ID: ${{ secrets.TG_ID }}
-        # 新增 Gotify 两个核心环境变量（与代码配置对应）
-        GOTIFY_URL: ${{ secrets.GOTIFY_URL }}
-        GOTIFY_TOKEN: ${{ secrets.GOTIFY_TOKEN }}
+        WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+        WEBHOOK_HEADERS: ${{ secrets.WEBHOOK_HEADERS }}
