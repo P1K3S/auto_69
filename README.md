@@ -1,6 +1,6 @@
 # Power BY [am-check-in](https://github.com/amclubs/am-check-in)
 
-基于 am-check-in 修改，69云机场自动签到脚本，支持通用 Webhook 推送通知，通过 GitHub Actions 定时运行，释放你的双手出去 City Walk
+基于 am-check-in 修改，69云机场自动签到脚本，支持通用 Webhook 推送通知，通过 GitHub Actions 定时运行
 
 ## 使用方法
 
