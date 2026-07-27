@@ -10,7 +10,7 @@
 ### ② 设置 GitHub Actions 变量
 1. Settings -> secrets and variables -> Actions -> Secrets -> New repository secrets
 2. 设置必填变量 DOMAIN、USERNAME、PASSWORD
-3. (可选) 设置 Webhook 推送参数 WEBHOOK_URL、WEBHOOK_HEADERS
+3. (可选) 设置 Webhook 推送参数 WEBHOOK_URL、WEBHOOK_HEADERS、WEBHOOK_TYPE、TIMEZONE_OFFSET
 
 ### ③ 设置定时任务时间
 1. 进入代码 .github/workflows -> check-in-job.yml
