@@ -19,16 +19,15 @@ jobs:
         node-version: '16'
 
     - name: Install dependencies
-      run: |
-        npm install
-        npm install node-fetch
+      run: npm install
 
     - name: Run scheduled check-in
-      run: |
-        node _worker.js
+      run: node _worker.js
       env:
         DOMAIN: ${{ secrets.DOMAIN }}
         USERNAME: ${{ secrets.USERNAME }}
         PASSWORD: ${{ secrets.PASSWORD }}
         WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
         WEBHOOK_HEADERS: ${{ secrets.WEBHOOK_HEADERS }}
+        WEBHOOK_TYPE: ${{ secrets.WEBHOOK_TYPE }}
+        TIMEZONE_OFFSET: ${{ secrets.TIMEZONE_OFFSET }}
