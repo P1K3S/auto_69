@@ -31,6 +31,8 @@ on:
 | `PASSWORD` | `pwd` | ✅ | 机场账户密码 |
 | `WEBHOOK_URL` | `https://gotify.example.com/message` | ❌ | Webhook 推送地址 |
 | `WEBHOOK_HEADERS` | `{"Authorization":"Bearer xxx"}` | ❌ | Webhook 自定义请求头 (JSON 格式) |
+| `WEBHOOK_TYPE` | `feishu` / `default` | ❌ | Webhook 类型，设为 `feishu` 时使用飞书机器人格式 |
+| `TIMEZONE_OFFSET` | `8` | ❌ | 时区偏移量（小时），默认 `8`（东八区） |
 
 ### Webhook 推送说明
 
@@ -47,6 +49,21 @@ on:
 - Bearer Token 认证: `{"Authorization":"Bearer your-token"}`
 - Gotify 兼容: `{"X-Gotify-Key":"your-gotify-app-token"}`
 - 多个请求头: `{"Authorization":"Bearer token","X-Custom":"value"}`
+
+### 飞书 Webhook 机器人
+
+设置 `WEBHOOK_TYPE=feishu`，`WEBHOOK_URL` 填入飞书机器人的 Webhook 地址，请求体格式将自动适配：
+
+```json
+{
+  "msg_type": "text",
+  "content": {
+    "text": "69云 签到通知\n执行时间: 2026-05-25 15:23:00\n🎉 69云签到结果 🎉\n签到完成"
+  }
+}
+```
+
+飞书机器人无需额外设置 `WEBHOOK_HEADERS`。
 
 
  #

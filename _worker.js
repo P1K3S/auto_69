@@ -5,6 +5,8 @@ let username = "Enter your email here";
 let password = "Enter your password here";
 let webhookUrl = '';
 let webhookHeaders = '';
+let webhookType = 'default';
+let timezoneOffset = 8;
 let checkInResult;
 
 const env = {
@@ -12,7 +14,9 @@ const env = {
     USERNAME: process.env.USERNAME,
     PASSWORD: process.env.PASSWORD,
     WEBHOOK_URL: process.env.WEBHOOK_URL,
-    WEBHOOK_HEADERS: process.env.WEBHOOK_HEADERS
+    WEBHOOK_HEADERS: process.env.WEBHOOK_HEADERS,
+    WEBHOOK_TYPE: process.env.WEBHOOK_TYPE,
+    TIMEZONE_OFFSET: process.env.TIMEZONE_OFFSET
 };
 
 (async () => {
@@ -27,6 +31,7 @@ const env = {
 })();
 
 async function handleCheckIn() {
+    checkInResult = '';
     try {
         validateConfig();
         const cookies = await loginAndGetCookies();
@@ -35,7 +40,8 @@ async function handleCheckIn() {
         await sendWebhookMessage(checkInResult);
     } catch (error) {
         console.error("签到失败:", error);
-        const errorMsg = `${checkInResult}\n🎁${error.message}`;
+        const prefix = checkInResult ? `${checkInResult}\n` : '';
+        const errorMsg = `${prefix}🎁${error.message}`;
         await sendWebhookMessage(errorMsg);
     }
 }
@@ -112,7 +118,7 @@ async function sendWebhookMessage(msg) {
     }
 
     const now = new Date();
-    const formattedTime = new Date(now.getTime() + 8 * 60 * 60 * 1000)
+    const formattedTime = new Date(now.getTime() + timezoneOffset * 60 * 60 * 1000)
         .toISOString()
         .slice(0, 19)
         .replace("T", " ");
@@ -136,11 +142,7 @@ async function sendWebhookMessage(msg) {
                 "Content-Type": "application/json; charset=utf-8",
                 ...customHeaders
             },
-            body: JSON.stringify({
-                title: title,
-                message: messageText,
-                priority: 5
-            })
+            body: buildWebhookBody(title, messageText)
         });
 
         if (!response.ok) {
@@ -161,8 +163,26 @@ function formatDomain(domain) {
     return domain.includes("//") ? domain : `https://${domain}`;
 }
 
+function buildWebhookBody(title, messageText) {
+    if (webhookType === 'feishu') {
+        return JSON.stringify({
+            msg_type: "text",
+            content: {
+                text: `${title}\n${messageText}`
+            }
+        });
+    }
+    return JSON.stringify({
+        title: title,
+        message: messageText,
+        priority: 5
+    });
+}
+
 function maskSensitiveData(str, type = 'default') {
     if (!str) return "N/A";
+
+    if (type === 'password') return "******";
 
     const urlPattern = /^(https?:\/\/)([^\/]+)(.*)$/;
     if (type === 'url' && urlPattern.test(str)) {
@@ -183,10 +203,12 @@ async function initConfig(env) {
     password = env.PASSWORD || password;
     webhookUrl = env.WEBHOOK_URL || webhookUrl;
     webhookHeaders = env.WEBHOOK_HEADERS || webhookHeaders;
+    webhookType = env.WEBHOOK_TYPE || webhookType;
+    timezoneOffset = parseInt(env.TIMEZONE_OFFSET) || timezoneOffset;
 
     checkInResult = `配置信息:
     登录地址: ${maskSensitiveData(domain, 'url')}
     登录账号: ${maskSensitiveData(username, 'email')}
-    登录密码: ${maskSensitiveData(password)}
+    登录密码: ${maskSensitiveData(password, 'password')}
     Webhook 推送:  ${webhookUrl ? "已启用" : "未启用"} `;
 }
