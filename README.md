@@ -56,9 +56,21 @@ on:
 
 ```json
 {
-  "msg_type": "text",
-  "content": {
-    "text": "69云 签到通知\n执行时间: 2026-05-25 15:23:00\n🎉 69云签到结果 🎉\n签到完成"
+  "msg_type": "interactive",
+  "card": {
+    "header": {
+      "title": {
+        "tag": "plain_text",
+        "content": "69云 签到通知"
+      },
+      "template": "blue"
+    },
+    "elements": [
+      {
+        "tag": "markdown",
+        "content": "执行时间: 2026-05-25 15:23:00\n🎉 69云签到结果 🎉\n签到完成"
+      }
+    ]
   }
 }
 ```

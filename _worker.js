@@ -166,9 +166,21 @@ function formatDomain(domain) {
 function buildWebhookBody(title, messageText) {
     if (webhookType === 'feishu') {
         return JSON.stringify({
-            msg_type: "text",
-            content: {
-                text: `${title}\n${messageText}`
+            msg_type: "interactive",
+            card: {
+                header: {
+                    title: {
+                        tag: "plain_text",
+                        content: title
+                    },
+                    template: "blue"
+                },
+                elements: [
+                    {
+                        tag: "markdown",
+                        content: messageText
+                    }
+                ]
             }
         });
     }
