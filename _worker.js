@@ -108,7 +108,18 @@ async function performCheckIn(cookies) {
         throw new Error(`69云签到失败: ${jsonResponse.msg || "未知错误"}`);
     }
 
-    return `🎉 69云签到结果 🎉\n${jsonResponse.msg || "签到完成"}`;
+    const { traffic, trafficInfo } = jsonResponse;
+    let trafficMsg = `${jsonResponse.msg || "签到完成"}`;
+    if (traffic || trafficInfo) {
+        trafficMsg += `\n\n📊 流量统计`;
+        if (traffic) trafficMsg += `\n总流量: ${traffic}`;
+        if (trafficInfo) {
+            if (trafficInfo.todayUsedTraffic) trafficMsg += `\n今日已用: ${trafficInfo.todayUsedTraffic}`;
+            if (trafficInfo.lastUsedTraffic) trafficMsg += `\n上次已用: ${trafficInfo.lastUsedTraffic}`;
+            if (trafficInfo.unUsedTraffic) trafficMsg += `\n剩余流量: ${trafficInfo.unUsedTraffic}`;
+        }
+    }
+    return `🎉 69云签到结果 🎉\n${trafficMsg}`;
 }
 
 async function sendWebhookMessage(msg) {
